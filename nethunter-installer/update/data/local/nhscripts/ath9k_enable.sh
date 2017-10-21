@@ -7,6 +7,12 @@
 # system device
 SYSTEM_DEVICE="/dev/block/bootdevice/by-name/system"
 
+# if Magisk is available use it's init folder
+INIT_DIR="/system/etc/init.d"
+if [ -e /magisk/.core/post-fs-data.d/ ]; then
+    INIT_DIR="/magisk/.core/post-fs-data.d"
+fi
+
 # check if needed modules are available otherwise quit
 if [ ! -f /system/lib/modules/mac80211.ko -o ! -f /system/lib/modules/ath9k.ko -o ! -f /system/lib/modules/ath9k_common.ko -o ! -f /system/lib/modules/ath9k_htc.ko -o ! -f /system/lib/modules/ath9k.ko ]; then
 	echo "At least one of the needed modules are missing!"
@@ -39,29 +45,29 @@ if [ "$1" == "now" ]; then
 fi
 
 # create init script in /system/etc/init.d folder and reboot
-if [ ! -f /system/etc/init.d/99_ath9k_init.sh ]; then
+if [ ! -f $INIT_DIR/99_ath9k_init.sh ]; then
 
 	# disable systems wifi (+reboot = important to avoid possible driver clash!)
 	svc wifi disable
 
 	# create init script
 	busybox mount -o remount,rw -t ext4 $SYSTEM_DEVICE /system
-	echo "#!/system/bin/sh" > /system/etc/init.d/99_ath9k_init.sh
-	echo "busybox insmod /system/lib/modules/mac80211.ko" >> /system/etc/init.d/99_ath9k_init.sh
+	echo "#!/system/bin/sh" > $INIT_DIR/99_ath9k_init.sh
+	echo "busybox insmod /system/lib/modules/mac80211.ko" >> $INIT_DIR/99_ath9k_init.sh
 
 	# only add ath.ko module if available (newer driver versions have that module)
 	if [ -f /system/lib/modules/ath.ko ]; then
-		echo "busybox insmod /system/lib/modules/ath.ko" >> /system/etc/init.d/99_ath9k_init.sh
+		echo "busybox insmod /system/lib/modules/ath.ko" >> $INIT_DIR/99_ath9k_init.sh
 	fi
 
 	# ath9k module sequence
-	echo "busybox insmod /system/lib/modules/ath9k_hw.ko" >> /system/etc/init.d/99_ath9k_init.sh
-	echo "busybox insmod /system/lib/modules/ath9k_common.ko" >> /system/etc/init.d/99_ath9k_init.sh
-	echo "busybox insmod /system/lib/modules/ath9k_htc.ko" >> /system/etc/init.d/99_ath9k_init.sh
-	echo "busybox insmod /system/lib/modules/ath9k.ko" >> /system/etc/init.d/99_ath9k_init.sh
+	echo "busybox insmod /system/lib/modules/ath9k_hw.ko" >> $INIT_DIR/99_ath9k_init.sh
+	echo "busybox insmod /system/lib/modules/ath9k_common.ko" >> $INIT_DIR/99_ath9k_init.sh
+	echo "busybox insmod /system/lib/modules/ath9k_htc.ko" >> $INIT_DIR/99_ath9k_init.sh
+	echo "busybox insmod /system/lib/modules/ath9k.ko" >> $INIT_DIR/99_ath9k_init.sh
 
 	# make it executeable
-	busybox chmod 775 /system/etc/init.d/99_ath9k_init.sh
+	busybox chmod 775 $INIT_DIR/99_ath9k_init.sh
 	busybox sync
 	busybox mount -o remount,ro -t ext4 $SYSTEM_DEVICE /system
 

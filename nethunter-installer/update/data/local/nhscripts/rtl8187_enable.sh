@@ -7,6 +7,12 @@
 # system device
 SYSTEM_DEVICE="/dev/block/bootdevice/by-name/system"
 
+# if Magisk is available use its init folder
+INIT_DIR="/system/etc/init.d"
+if [ -e /magisk/.core/post-fs-data.d/ ]; then
+    INIT_DIR="/magisk/.core/post-fs-data.d"
+fi
+
 # check if needed modules are available otherwise quit
 if [ ! -f /system/lib/modules/mac80211.ko -o ! -f /system/lib/modules/rtl8187.ko -o ! -f /system/lib/modules/eeprom_93cx6.ko ]; then
 	echo "At least one of the needed modules are missing!"
@@ -32,23 +38,23 @@ if [ "$1" == "now" ]; then
 fi
 
 # create init script in /system/etc/init.d folder and reboot
-if [ ! -f /system/etc/init.d/99_rtl8187_init.sh ]; then
+if [ ! -f $INIT_DIR/99_rtl8187_init.sh ]; then
 
 	# disable systems wifi (+reboot = important to avoid possible driver clash!)
 	svc wifi disable
 
 	# create init script
 	busybox mount -o remount,rw -t ext4 $SYSTEM_DEVICE /system
-	echo "#!/system/bin/sh" > /system/etc/init.d/99_rtl8187_init.sh
-	echo "busybox insmod /system/lib/modules/mac80211.ko" >> /system/etc/init.d/99_rtl8187_init.sh
-	echo "busybox insmod /system/lib/modules/eeprom_93cx6.ko" >> /system/etc/init.d/99_rtl8187_init.sh
-	echo "busybox insmod /system/lib/modules/rtl8187.ko" >> /system/etc/init.d/99_rtl8187_init.sh
-	busybox chmod 775 /system/etc/init.d/99_rtl8187_init.sh
+	echo "#!/system/bin/sh" > $INIT_DIR/99_rtl8187_init.sh
+	echo "busybox insmod /system/lib/modules/mac80211.ko" >> $INIT_DIR/99_rtl8187_init.sh
+	echo "busybox insmod /system/lib/modules/eeprom_93cx6.ko" >> $INIT_DIR/99_rtl8187_init.sh
+	echo "busybox insmod /system/lib/modules/rtl8187.ko" >> $INIT_DIR/99_rtl8187_init.sh
+	busybox chmod 775 $INIT_DIR/99_rtl8187_init.sh
 	busybox sync
 	busybox mount -o remount,ro -t ext4 $SYSTEM_DEVICE /system
 
 	# make it executeable
-	busybox chmod 775 /system/etc/init.d/99_rtl8187_init.sh
+	busybox chmod 775 $INIT_DIR/99_rtl8187_init.sh
 	busybox sync
 	busybox mount -o remount,ro -t ext4 $SYSTEM_DEVICE /system
 

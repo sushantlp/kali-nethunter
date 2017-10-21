@@ -6,6 +6,12 @@
 
 SYSTEM_DEVICE="/dev/block/bootdevice/by-name/system"
 
+# if Magisk is available use its init folder
+INIT_DIR="/system/etc/init.d"
+if [ -e /magisk/.core/post-fs-data.d/ ]; then
+    INIT_DIR="/magisk/.core/post-fs-data.d"
+fi
+
 # check if needed modules are available otherwise quit
 if [ ! -f /system/lib/modules/mac80211.ko -o ! -f /system/lib/modules/ath9k.ko -o ! -f /system/lib/modules/ath9k_common.ko -o ! -f /system/lib/modules/ath9k_htc.ko -o ! -f /system/lib/modules/ath9k.ko ]; then
 	echo "At least one of the needed modules are missing!"
@@ -31,9 +37,9 @@ if [ "$1" == "now" ]; then
 fi
 
 # default is to remove init script again and do a reboot (lesser problems expected)
-if [ -f /system/etc/init.d/99_ath9k_init.sh ]; then
+if [ -f $INIT_DIR/99_ath9k_init.sh ]; then
 	busybox mount -o remount,rw -t ext4 $SYSTEM_DEVICE /system
-	rm /system/etc/init.d/99_ath9k_init.sh
+	rm $INIT_DIR/99_ath9k_init.sh
 	busybox sync
 	busybox mount -o remount,ro -t ext4 $SYSTEM_DEVICE /system
 	# enable systems wifi
