@@ -36,3 +36,19 @@ We're relying on you, the community, to port your devices for the full Kali NetH
 
 Fri Jan  15 02:09:40 EST 2016
 
+## Short Troubleshooting added by ZaneZam for this fork 
+These are some issues i came across in combination with the boeffla nethunter build i made so i thought that might be useful for everyone using this
+
+Problems getting your adapter to work? Use a proper Kernel + Checkout for a usage example:
+https://forum.xda-developers.com/showpost.php?p=72681706&postcount=306
+
+Any nethunter apps crashing? try to re-install apps manually. apks are in /data/app directory
+more infos: https://github.com/offensive-security/kali-nethunter/issues/420
+
+Problems with wifite and monitor mode? try executing: airmon-ng start wlanX && wifite (X=the actual number of the usb adpater)
+more infos: https://github.com/offensive-security/kali-nethunter/issues/801
+
+Always enable OTG on OOS roms:
+https://www.xda-developers.com/enable-always-on-otg-oxygenos/
+
+to be continued...
